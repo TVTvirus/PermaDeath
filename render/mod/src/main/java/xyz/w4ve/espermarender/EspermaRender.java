@@ -101,7 +101,7 @@ public class EspermaRender implements ClientModInitializer {
         switch (phase) {
             case WAIT_MENU -> {
                 // Menu principal listo: abrir el replay
-                if (mc.screen instanceof TitleScreen) {
+                if (mc.gui.screen() instanceof TitleScreen) {
                     if (++settleTicks < 40) return; // dejar respirar al menu
                     LOGGER.info("[espermarender] abriendo replay...");
                     Flashback.openReplayWorld(Path.of(job.replay));
@@ -152,13 +152,18 @@ public class EspermaRender implements ClientModInitializer {
             editorState.release(stamp);
         }
 
+        // encoder: el primero que ofrezca Flashback (ordena hardware > software)
+        String[] encoders = VideoCodec.H264.getEncoders();
+        String encoder = encoders.length > 0 ? encoders[0] : "libx264";
+        LOGGER.info("[espermarender] encoder: {}", encoder);
+
         ExportSettings settings = new ExportSettings(
                 "espermadeath", editorState,
                 Vec3.ZERO, 0f, 0f,
                 job.width, job.height, start, end,
                 ExportProjection.PERSPECTIVE, 0f,
                 job.fps, false,
-                VideoContainer.MP4, VideoCodec.H264, null, job.bitrate, false, false, false,
+                VideoContainer.MP4, VideoCodec.H264, encoder, job.bitrate, false, false, false,
                 true, true, AudioCodec.AAC,
                 Path.of(job.output), null);
 

@@ -39,7 +39,14 @@ os.makedirs(os.path.expanduser("~/.local/share/espermarender"), exist_ok=True)
 json.dump(j, open(os.path.expanduser("~/.local/share/espermarender/job.json"), "w"))
 PYEOF
     rm -f "$OUT.status"
-    flatpak run org.prismlauncher.PrismLauncher --launch "EspermaRender" >>"$LOG" 2>&1 &
+    # Prism ignora el --launch si le llega mientras inicializa: arrancar primero,
+    # esperar a que respire, y ENTONCES mandar la orden (via su IPC).
+    PROFILE=$HOME/.local/share/espermarender/prism
+    if ! pgrep -f "prismlauncher" >/dev/null || ! pgrep -af "prismlauncher" | grep -q "espermarender"; then
+        flatpak run org.prismlauncher.PrismLauncher -d "$PROFILE" >>"$LOG" 2>&1 &
+        sleep 25
+    fi
+    flatpak run org.prismlauncher.PrismLauncher -d "$PROFILE" --launch "EspermaRender" >>"$LOG" 2>&1 &
     PRISM=$!
     # esperar el marcador (max 20 min)
     for i in $(seq 1 240); do
