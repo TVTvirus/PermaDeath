@@ -80,11 +80,11 @@ public final class GaturroMobs {
     public static net.minecraft.world.item.ItemStack superApple() {
         var s = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GOLDEN_APPLE);
         s.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,
-                net.minecraft.network.chat.Component.literal("Manzana de Gaturro")
+                net.minecraft.network.chat.Component.literal(Lang.get("apple.name"))
                         .withStyle(net.minecraft.ChatFormatting.GOLD, net.minecraft.ChatFormatting.BOLD));
         s.set(net.minecraft.core.component.DataComponents.LORE,
                 new net.minecraft.world.item.component.ItemLore(List.of(
-                        net.minecraft.network.chat.Component.literal("Click derecho: +1 corazón perdido")
+                        net.minecraft.network.chat.Component.literal(Lang.get("apple.lore"))
                                 .withStyle(net.minecraft.ChatFormatting.GRAY))));
         var tag = new net.minecraft.nbt.CompoundTag();
         tag.putBoolean(SGA_KEY, true);

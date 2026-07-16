@@ -50,6 +50,7 @@ public class GaturroManager {
     private GaturroManager(MinecraftServer server) {
         this.server = server;
         this.file = server.getWorldPath(LevelResource.ROOT).resolve("permadeath_gaturro.json");
+        Lang.load(server.getWorldPath(LevelResource.ROOT).resolve("permadeath_lang.json"));
         this.state = GaturroState.load(file);
         this.phases = GaturroPhases.loadOrCreate(
                 server.getWorldPath(LevelResource.ROOT).resolve("gaturro_phases.json"));
@@ -137,7 +138,7 @@ public class GaturroManager {
         if (state.isEliminated(id)) return;
 
         String custom = state.deathMessages.get(id.toString());
-        String deathText = custom != null ? custom.replace("%player%", name) : name + " ha muerto";
+        String deathText = custom != null ? custom.replace("%player%", name) : Lang.f("death.default", name);
 
         int lives = state.getLives(id) - 1;
         state.setLives(id, lives);
@@ -164,11 +165,11 @@ public class GaturroManager {
             }});
         }
 
-        MutableComponent msg = Component.literal("gaturro.exe ")
+        MutableComponent msg = Component.literal(Lang.get("storm.name") + " ")
                 .withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD)
                 .append(Component.literal(deathText + ". ")
                         .withStyle(ChatFormatting.RED))
-                .append(Component.literal("+" + day + "h de tormenta")
+                .append(Component.literal(Lang.f("death.storm_added", day))
                         .withStyle(ChatFormatting.GRAY));
         broadcast(msg);
 
@@ -181,7 +182,7 @@ public class GaturroManager {
         } else {
             broadcastTitle(
                     Component.literal("☠ " + deathText).withStyle(ChatFormatting.RED, ChatFormatting.BOLD),
-                    Component.literal("gaturro.exe +" + day + "h - le quedan " + lives + " vidas")
+                    Component.literal(Lang.f("death.lives_left", Lang.get("storm.name") + " +" + day + "h", lives))
                             .withStyle(ChatFormatting.GRAY),
                     10, 80, 25);
             broadcastSound(SoundEvents.WITHER_SPAWN, 1.0F, 0.9F);
@@ -193,8 +194,8 @@ public class GaturroManager {
         state.eliminate(player.getUUID());
         player.setGameMode(GameType.SPECTATOR);
         if (DiscordNotifier.get() != null) DiscordNotifier.get().eliminated(player.getGameProfile().name(), day());
-        broadcast(Component.literal("Este es el comienzo del sufrimiento eterno de "
-                + player.getGameProfile().name() + ". HA SIDO ESPERMABANEADO!")
+        broadcast(Component.literal(Lang.f("eliminated.chat",
+                player.getGameProfile().name(), Lang.get("eliminated.word")))
                 .withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
         dramaEliminate(player);
     }
@@ -202,8 +203,8 @@ public class GaturroManager {
     /** Pantalla dramatica (title) + sonido de explosion para todos. */
     private void dramaEliminate(ServerPlayer dead) {
         broadcastTitle(
-                Component.literal("¡EspermaDeath!").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD),
-                Component.literal(dead.getGameProfile().name() + " ha sido EspermaBaneado").withStyle(ChatFormatting.RED),
+                Component.literal("¡" + Lang.get("event.name") + "!").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD),
+                Component.literal(Lang.f("eliminated.subtitle", dead.getGameProfile().name(), Lang.get("eliminated.word"))).withStyle(ChatFormatting.RED),
                 10, 120, 30);
         broadcastSound(SoundEvents.WITHER_SPAWN, 1.0F, 0.5F);
         broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 1.0F, 0.7F);
@@ -226,7 +227,7 @@ public class GaturroManager {
         GaturroPhases.Phase cur = phases.current(day());
         if (cur == null) return;
         sendTitle(player,
-                Component.literal("Día " + day() + " - " + cur.name).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
+                Component.literal(Lang.f("phase.day", day(), cur.name)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                 Component.literal(cur.announce).withStyle(ChatFormatting.GRAY),
                 10, 90, 20);
     }
@@ -296,8 +297,7 @@ public class GaturroManager {
         String id = p.getUUID().toString();
         int lost = Math.min(14, state.hpLost.getOrDefault(id, 0) + 2);
         state.hpLost.put(id, lost);
-        p.sendSystemMessage(Component.literal("Perdiste un corazón. Te quedan "
-                + ((20 - lost) / 2) + ". Las Manzanas de Gaturro los devuelven.")
+        p.sendSystemMessage(Component.literal(Lang.f("heart.lost", (20 - lost) / 2))
                 .withStyle(ChatFormatting.DARK_RED));
     }
 
@@ -306,23 +306,23 @@ public class GaturroManager {
         String id = p.getUUID().toString();
         int lost = state.hpLost.getOrDefault(id, 0);
         if (lost <= 0) {
-            p.sendSystemMessage(Component.literal("No te falta ningún corazón. Guárdala para cuando duela.")
+            p.sendSystemMessage(Component.literal(Lang.get("apple.full"))
                     .withStyle(ChatFormatting.GRAY));
             return false;
         }
         state.hpLost.put(id, lost - 2);
         save();
         applyHearts(p);
-        p.sendSystemMessage(Component.literal("Recuperaste un corazón. Ahora tienes "
-                + ((20 - lost + 2) / 2) + ".").withStyle(ChatFormatting.GREEN));
+        p.sendSystemMessage(Component.literal(Lang.f("apple.used", (20 - lost + 2) / 2))
+                .withStyle(ChatFormatting.GREEN));
         return true;
     }
 
     /** Anuncio dramatico de revive (para /pdc revive): que nadie flipe con el zombi. */
     public void announceRevive(String name, int lives) {
         broadcastTitle(
-                Component.literal("✟ " + name + " HA VUELTO").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD),
-                Component.literal("Los dioses del Mundo Gaturro le dieron " + lives + " vida" + (lives == 1 ? "" : "s"))
+                Component.literal(Lang.f("revive.title", name)).withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD),
+                Component.literal(Lang.f("revive.subtitle", lives))
                         .withStyle(ChatFormatting.GRAY),
                 10, 90, 25);
         broadcastSound(SoundEvents.TOTEM_USE, 1.0F, 1.0F);
@@ -332,9 +332,9 @@ public class GaturroManager {
     /** El totem le fallo a alguien (mixin totem_fail): que se sepa. */
     public void onTotemFailed(ServerPlayer player) {
         String name = player.getGameProfile().name();
-        broadcast(Component.literal("El tótem de " + name + " FALLÓ. ")
+        broadcast(Component.literal(Lang.f("totem.failed", name))
                 .withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD)
-                .append(Component.literal("Les dijimos que no confiaran.")
+                .append(Component.literal(Lang.get("totem.taunt"))
                         .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)));
         broadcastSound(SoundEvents.ITEM_BREAK.value(), 1.0F, 0.6F);
     }
@@ -380,11 +380,11 @@ public class GaturroManager {
         state.seen(id, now());
         if (state.isEliminated(id)) {
             player.setGameMode(GameType.SPECTATOR);
-            player.sendSystemMessage(Component.literal("Estas eliminado. Solo espectador.")
+            player.sendSystemMessage(Component.literal(Lang.get("join.eliminated"))
                     .withStyle(ChatFormatting.DARK_RED));
         } else {
-            player.sendSystemMessage(Component.literal("Dia " + day() + " - Te quedan "
-                    + state.getLives(id) + " vidas.").withStyle(ChatFormatting.GOLD));
+            player.sendSystemMessage(Component.literal(Lang.f("join.lives", day(), state.getLives(id)))
+                    .withStyle(ChatFormatting.GOLD));
             showCurrentPhase(player); // por si se perdio el cambio de fase estando desconectado
             if (flag("heart_slot_loss")) applyHearts(player);
         }
@@ -431,8 +431,8 @@ public class GaturroManager {
         if (active) {
             if (!stormWasActive) {
                 broadcastTitle(
-                        Component.literal("gaturro.exe").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD),
-                        Component.literal("¡Empieza la tormenta!").withStyle(ChatFormatting.RED),
+                        Component.literal(Lang.get("storm.name")).withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD),
+                        Component.literal(Lang.f("storm.start.title", Lang.get("storm.name"))).withStyle(ChatFormatting.RED),
                         10, 50, 15);
                 broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, 4.0F, 0.5F);
                 if (DiscordNotifier.get() != null) DiscordNotifier.get().stormStart(state.stormSecondsLeft(now), day());
@@ -443,14 +443,14 @@ public class GaturroManager {
             }
         } else if (stormWasActive) {
             if (overworld != null) clearStorm(overworld);
-            broadcast(Component.literal("gaturro.exe se ha calmado... por ahora.")
+            broadcast(Component.literal(Lang.f("storm.calm", Lang.get("storm.name")))
                     .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         }
         stormWasActive = active;
 
         // Actionbar con el tiempo de gaturro.exe + oscuridad a los eliminados (spectator con poca vision)
         Component actionBar = active
-                ? Component.literal("gaturro.exe - Quedan " + humanTime(state.stormSecondsLeft(now)) + " de tormenta")
+                ? Component.literal(Lang.f("storm.actionbar", Lang.get("storm.name"), humanTime(state.stormSecondsLeft(now))))
                     .withStyle(ChatFormatting.GRAY)
                 : null;
         boolean endOpen = flag("end_open");
@@ -537,7 +537,7 @@ public class GaturroManager {
 
     private void announcePhase(GaturroPhases.Phase ph, int day) {
         broadcastTitle(
-                Component.literal("Día " + day + " - " + ph.name).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
+                Component.literal(Lang.f("phase.day", day, ph.name)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                 Component.literal(ph.announce).withStyle(ChatFormatting.GRAY),
                 10, 90, 20);
         broadcast(Component.literal("» " + ph.name + ": " + ph.announce).withStyle(ChatFormatting.GOLD));
@@ -562,8 +562,8 @@ public class GaturroManager {
     private void evictFromEnd(ServerPlayer p, ServerLevel overworld, BlockPos spawn) {
         p.teleportTo(overworld, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5,
                 java.util.Set.of(), 0f, 0f, false);
-        p.sendSystemMessage(Component.literal("El End está sellado. Se abre el día "
-                + phases.endOpensDay + ".").withStyle(ChatFormatting.RED));
+        p.sendSystemMessage(Component.literal(Lang.f("end.sealed", phases.endOpensDay))
+                .withStyle(ChatFormatting.RED));
     }
 
     // ---------------------------------------------------------------- util

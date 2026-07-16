@@ -1,5 +1,0 @@
-[Unit]
-Description=EspermaRender worker (replay -> mp4 -> sotano)
-[Service]
-Type=oneshot
-ExecStart=%h/.local/bin/gaturro-render-worker

@@ -151,12 +151,12 @@ public class DragonBattle {
     private void announcePhase(int phase, ServerLevel end) {
         switch (phase) {
             case 2 -> {
-                mgr.broadcast(Component.literal("La Dragona empieza a escupir gatos. Si, gatos.")
+                mgr.broadcast(Component.literal(Lang.get("dragon.phase2"))
                         .withStyle(ChatFormatting.LIGHT_PURPLE));
                 mgr.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 1.0F, 1.2F);
             }
             case 3 -> {
-                mgr.broadcast(Component.literal("gaturro.exe se metió en la Dragona. Corran.")
+                mgr.broadcast(Component.literal(Lang.get("dragon.phase3"))
                         .withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
                 mgr.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 1.0F, 0.5F);
                 // Ceguera de bienvenida a los que estan en el End.
@@ -267,16 +267,15 @@ public class DragonBattle {
         }
 
         mgr.broadcastTitle(
-                Component.literal("La Dragona cayó").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD),
-                Component.literal(HEARTS_ON_DEATH + " Corazones de Gaturro cayeron en la isla")
+                Component.literal(Lang.get("dragon.down.title")).withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD),
+                Component.literal(Lang.f("dragon.down.subtitle", HEARTS_ON_DEATH))
                         .withStyle(ChatFormatting.GRAY),
                 10, 100, 25);
         mgr.broadcastSound(SoundEvents.ENDER_DRAGON_DEATH, 1.0F, 0.8F);
-        mgr.broadcast(Component.literal("La Dragona cayó. ").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD)
-                .append(Component.literal(HEARTS_ON_DEATH + " Corazones de Gaturro cayeron con un rayo en: ")
-                        .withStyle(ChatFormatting.GRAY))
+        mgr.broadcast(Component.literal(Lang.f("dragon.down.chat", HEARTS_ON_DEATH))
+                .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD)
                 .append(Component.literal(coords.toString()).withStyle(ChatFormatting.GOLD)));
-        mgr.broadcast(Component.literal("Solo hay " + HEARTS_ON_DEATH + ". Corran. Click derecho = +1 vida.")
+        mgr.broadcast(Component.literal(Lang.f("dragon.down.hint", HEARTS_ON_DEATH))
                 .withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
 
         if (DiscordNotifier.get() != null) {
@@ -307,11 +306,11 @@ public class DragonBattle {
 
     public static ItemStack heart() {
         ItemStack s = new ItemStack(Items.NETHER_STAR);
-        s.set(DataComponents.CUSTOM_NAME, Component.literal("Corazón de Gaturro")
+        s.set(DataComponents.CUSTOM_NAME, Component.literal(Lang.get("heart.name"))
                 .withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
         s.set(DataComponents.LORE, new ItemLore(List.of(
-                Component.literal("Click derecho: +1 vida").withStyle(ChatFormatting.GRAY),
-                Component.literal("Se lo arrancaron a la Dragona.").withStyle(ChatFormatting.DARK_GRAY))));
+                Component.literal(Lang.get("heart.lore1")).withStyle(ChatFormatting.GRAY),
+                Component.literal(Lang.get("heart.lore2")).withStyle(ChatFormatting.DARK_GRAY))));
         CompoundTag tag = new CompoundTag();
         tag.putBoolean(HEART_KEY, true);
         s.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
@@ -336,9 +335,9 @@ public class DragonBattle {
         stack.shrink(1);
 
         String name = player.getGameProfile().name();
-        mgr.broadcast(Component.literal(name + " se comió un Corazón de Gaturro. ")
+        mgr.broadcast(Component.literal(Lang.f("heart.used", name))
                 .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
-                .append(Component.literal("Ahora tiene " + lives + " vidas.").withStyle(ChatFormatting.GRAY)));
+                .append(Component.literal(Lang.f("heart.lives_now", lives)).withStyle(ChatFormatting.GRAY)));
         mgr.broadcastSound(SoundEvents.WITHER_SPAWN, 1.0F, 1.4F);
         if (DiscordNotifier.get() != null) DiscordNotifier.get().heartUsed(name, lives, mgr.day());
         return true;

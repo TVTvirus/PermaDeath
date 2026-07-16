@@ -1,0 +1,67 @@
+{
+  "_comment": "Copia templates.es.json o templates.en.json a templates.json y edita a gusto.",
+  "death": {
+    "channel": "deaths",
+    "color": "0xAA0000",
+    "title": "☠️ {player} ha muerto",
+    "description": "Le quedan **{lives}** vidas.\nLa tormenta crece **+{stormHours}h**.",
+    "footer": "Dia {day}"
+  },
+  "eliminated": {
+    "channel": "deaths",
+    "color": "0x550000",
+    "title": "💀 {player} ha sido ELIMINADO",
+    "description": "Perdio todas sus vidas. Espectador para siempre.",
+    "footer": "Eliminado el dia {day}",
+    "ping_role": "event"
+  },
+  "storm_start": {
+    "channel": "announcements",
+    "color": "0x3355FF",
+    "title": "⛈️ Empieza la tormenta",
+    "description": "Es **insaltable**: pueden dormir, pero no se va.",
+    "footer": "Dia {day}",
+    "ping_role": "event"
+  },
+  "phase": {
+    "channel": "announcements",
+    "color": "0xFFAA00",
+    "title": "📅 Dia {day}: {name}",
+    "description": "{announce}"
+  },
+  "end_open": {
+    "channel": "announcements",
+    "color": "0x00FFAA",
+    "title": "🌌 El End se ABRIO",
+    "description": "Dia {day}. El portal ya no esta sellado.",
+    "ping_role": "event"
+  },
+  "dragon_down": {
+    "channel": "announcements",
+    "color": "0xCC44FF",
+    "title": "🐉 La Dragona cayo",
+    "description": "Solto **{hearts}** Corazones. Cayeron con un rayo en:\n**{coords}**",
+    "footer": "Dia {day}",
+    "ping_role": "event"
+  },
+  "heart_used": {
+    "channel": "announcements",
+    "color": "0xFF3366",
+    "title": "❤️ {player} uso un Corazon",
+    "description": "Ahora tiene **{lives}** vidas.",
+    "footer": "Dia {day}"
+  },
+  "revived": {
+    "channel": "announcements",
+    "color": "0x33FF66",
+    "title": "✟ {player} HA VUELTO",
+    "description": "Le devolvieron la vida. Tiene **{lives}** vida(s).",
+    "footer": "Dia {day}"
+  },
+  "death_clip": {
+    "channel": "deaths",
+    "color": "0x880000",
+    "title": "🎧 Ultimas palabras de {player}",
+    "description": "Su ultimo minuto de voz: 50s antes de morir y 10s despues."
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_comment": "Copy templates.es.json or templates.en.json to templates.json and edit freely.",
+  "death": {
+    "channel": "deaths",
+    "color": "0xAA0000",
+    "title": "☠️ {player} died",
+    "description": "**{lives}** lives left.\nThe storm grows **+{stormHours}h**.",
+    "footer": "Day {day}"
+  },
+  "eliminated": {
+    "channel": "deaths",
+    "color": "0x550000",
+    "title": "💀 {player} has been ELIMINATED",
+    "description": "Lost all their lives. Spectator forever.",
+    "footer": "Eliminated on day {day}",
+    "ping_role": "event"
+  },
+  "storm_start": {
+    "channel": "announcements",
+    "color": "0x3355FF",
+    "title": "⛈️ The storm begins",
+    "description": "It cannot be skipped: you may sleep, but it will not leave.",
+    "footer": "Day {day}",
+    "ping_role": "event"
+  },
+  "phase": {
+    "channel": "announcements",
+    "color": "0xFFAA00",
+    "title": "📅 Day {day}: {name}",
+    "description": "{announce}"
+  },
+  "end_open": {
+    "channel": "announcements",
+    "color": "0x00FFAA",
+    "title": "🌌 The End is OPEN",
+    "description": "Day {day}. The portal is no longer sealed.",
+    "ping_role": "event"
+  },
+  "dragon_down": {
+    "channel": "announcements",
+    "color": "0xCC44FF",
+    "title": "🐉 The Dragon has fallen",
+    "description": "Dropped **{hearts}** Hearts. They fell with lightning at:\n**{coords}**",
+    "footer": "Day {day}",
+    "ping_role": "event"
+  },
+  "heart_used": {
+    "channel": "announcements",
+    "color": "0xFF3366",
+    "title": "❤️ {player} used a Heart",
+    "description": "They now have **{lives}** lives.",
+    "footer": "Day {day}"
+  },
+  "revived": {
+    "channel": "announcements",
+    "color": "0x33FF66",
+    "title": "✟ {player} IS BACK",
+    "description": "Their life was restored. They have **{lives}** life(s).",
+    "footer": "Day {day}"
+  },
+  "death_clip": {
+    "channel": "deaths",
+    "color": "0x880000",
+    "title": "🎧 {player}'s last words",
+    "description": "Their final minute of voice: 50s before death and 10s after."
+  }
+}

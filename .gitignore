@@ -6,3 +6,4 @@ libs/
 __pycache__/
 *.log
 job.json
+templates.json
