@@ -1,0 +1,22 @@
+{
+  "token": "PON_AQUI_EL_TOKEN_DEL_BOT_DEL_SOTANO",
+  "secret": "cambiame-igual-que-en-gaturro_discord.json",
+  "status": "EspermaDeath - Mundo Gaturro",
+
+  "listen_host": "0.0.0.0",
+  "listen_port": 8099,
+
+  "channels": {
+    "deaths": "ID_DEL_CANAL_DE_MUERTES",
+    "announcements": "ID_DEL_CANAL_DE_ANUNCIOS"
+  },
+
+  "roles": {
+    "espermadeath": "ID_DEL_ROL_A_MENCIONAR_PARA_AVISAR"
+  },
+
+  "_comment_clips": "El mod (dentro del contenedor) ve /home/container/...; el bot (en el host) lee el mismo archivo en el volumen de Pterodactyl. Aqui se traduce una ruta en la otra.",
+  "clip_path_map": {
+    "/home/container": "/var/lib/pterodactyl/volumes/93fdfb3f-6d0b-4cdd-8303-16a9a323b8b0"
+  }
+}

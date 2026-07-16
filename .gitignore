@@ -1,0 +1,8 @@
+config.json
+rcon_pw.txt
+build/
+.gradle/
+libs/
+__pycache__/
+*.log
+job.json

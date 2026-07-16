@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "permadeathgaturro",
+  "version": "${version}",
+  "name": "Permadeath Gaturro",
+  "description": "Mundo Gaturro permadeath: vidas, gaturro.exe y baneo AFK.",
+  "authors": ["TVTvirus"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["xyz.w4ve.gaturro.PermadeathGaturro"],
+    "voicechat": ["xyz.w4ve.gaturro.GaturroVoice"]
+  },
+  "mixins": ["permadeathgaturro.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": ">=26.1.2",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "voicechat": ">=2.6.0"
+  }
+}

@@ -1,0 +1,63 @@
+#!/bin/bash
+# Worker de EspermaRender: baja replays pendientes de Hetzner, los renderiza a
+# MP4 con la instancia Prism "EspermaRender" (Flashback POV del muerto) y sube
+# el resultado para que el bot lo publique en el sotano.
+set -u
+H="root@95.217.116.148"
+KEY=~/.ssh/id_ed25519
+QREMOTE=/root/gaturro-render/queue
+INBOX=/root/gaturro-render/inbox
+LOCAL=~/.local/share/espermarender
+LOG=$LOCAL/worker.log
+
+log(){ echo "[$(date +%H:%M:%S)] $*" | tee -a "$LOG"; }
+
+# no renderizar mientras juegas (el render come GPU y la ventana roba foco).
+# gaturro-render-worker --force lo salta bajo tu responsabilidad.
+if [ "${1:-}" != "--force" ] && pgrep -f "instances/Mundo Gaturro" >/dev/null; then
+    log "Minecraft de juego abierto: difiero el render (usa --force para obligar)."
+    exit 0
+fi
+
+mkdir -p "$LOCAL/queue"
+rsync -a -e "ssh -i $KEY" "$H:$QREMOTE/" "$LOCAL/queue/" 2>>"$LOG" || exit 0
+
+shopt -s nullglob
+for dir in "$LOCAL/queue"/*/; do
+    id=$(basename "$dir")
+    [ -f "$dir/replay.zip" ] && [ -f "$dir/job.json" ] || continue
+    [ -f "$dir/.done" ] && continue
+    log "renderizando $id..."
+    OUT="$dir/out.mp4"
+    python3 - "$dir" "$OUT" <<'PYEOF'
+import json, sys, os
+d, out = sys.argv[1], sys.argv[2]
+j = json.load(open(os.path.join(d, "job.json")))
+j["replay"] = os.path.abspath(os.path.join(d, "replay.zip"))
+j["output"] = os.path.abspath(out)
+os.makedirs(os.path.expanduser("~/.local/share/espermarender"), exist_ok=True)
+json.dump(j, open(os.path.expanduser("~/.local/share/espermarender/job.json"), "w"))
+PYEOF
+    rm -f "$OUT.status"
+    flatpak run org.prismlauncher.PrismLauncher --launch "EspermaRender" >>"$LOG" 2>&1 &
+    PRISM=$!
+    # esperar el marcador (max 20 min)
+    for i in $(seq 1 240); do
+        [ -f "$OUT.status" ] && break
+        sleep 5
+    done
+    rm -f ~/.local/share/espermarender/job.json
+    if [ -f "$OUT.status" ] && [ "$(cat "$OUT.status")" = "done" ] && [ -s "$OUT" ]; then
+        log "$id OK ($(du -h "$OUT" | cut -f1)) - subiendo"
+        ssh -i $KEY $H "mkdir -p $INBOX"
+        scp -i $KEY "$OUT" "$H:$INBOX/$id.mp4" >>"$LOG" 2>&1
+        scp -i $KEY "$dir/job.json" "$H:$INBOX/$id.json" >>"$LOG" 2>&1
+        ssh -i $KEY $H "rm -rf $QREMOTE/$id"
+        touch "$dir/.done"
+    else
+        log "$id FALLO o timeout (status=$(cat "$OUT.status" 2>/dev/null || echo none))"
+        pkill -f "instances/EspermaRender" 2>/dev/null
+        touch "$dir/.done"  # no reintentar en bucle; se revisa a mano
+    fi
+done
+log "worker: nada mas en cola"

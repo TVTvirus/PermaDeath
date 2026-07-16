@@ -1,0 +1,67 @@
+{
+  "_comment": "Plantillas de anuncios EDITABLES. Placeholders entre llaves segun el evento. Colores en hex 0xRRGGBB. channel = clave en config.json 'channels'. ping_role = clave en config.json 'roles' (opcional, para avisar a la gente).",
+  "death": {
+    "channel": "deaths",
+    "color": "0xAA0000",
+    "title": "☠️ {player} ha muerto",
+    "description": "Le quedan **{lives}** vidas.\ngaturro.exe **+{stormHours}h** de tormenta.",
+    "footer": "Dia {day} de EspermaDeath"
+  },
+  "eliminated": {
+    "channel": "deaths",
+    "color": "0x550000",
+    "title": "💀 {player} ha sido EspermaBaneado",
+    "description": "Se acabo su sufrimiento. Perdio sus 3 vidas.",
+    "footer": "Eliminado el dia {day}",
+    "ping_role": "espermadeath"
+  },
+  "storm_start": {
+    "channel": "announcements",
+    "color": "0x3355FF",
+    "title": "⛈️ gaturro.exe",
+    "description": "¡Empieza la tormenta! Es **insaltable**: pueden dormir, pero no se va.",
+    "footer": "Dia {day}",
+    "ping_role": "espermadeath"
+  },
+  "phase": {
+    "channel": "announcements",
+    "color": "0xFFAA00",
+    "title": "📅 Dia {day}: {name}",
+    "description": "{announce}"
+  },
+  "end_open": {
+    "channel": "announcements",
+    "color": "0x00FFAA",
+    "title": "🌌 El End se ABRIO",
+    "description": "Dia {day}. El portal ya no esta sellado. Algo los espera adentro...",
+    "ping_role": "espermadeath"
+  },
+  "dragon_down": {
+    "channel": "announcements",
+    "color": "0xCC44FF",
+    "title": "🐉 La Dragona cayo",
+    "description": "Soltó **{hearts}** Corazones de Gaturro. Cayeron con un rayo en:\n**{coords}**\n\nSolo hay {hearts}. Corran. Click derecho = +1 vida.",
+    "footer": "Dia {day}",
+    "ping_role": "espermadeath"
+  },
+  "heart_used": {
+    "channel": "announcements",
+    "color": "0xFF3366",
+    "title": "❤️ {player} se comio un Corazon de Gaturro",
+    "description": "Ahora tiene **{lives}** vidas. Que envidia.",
+    "footer": "Dia {day}"
+  },
+  "death_clip": {
+    "channel": "deaths",
+    "color": "0x880000",
+    "title": "🎧 Ultimas palabras de {player}",
+    "description": "Lo que oia (y gritaba) en su ultimo minuto: 50s antes de morir y 10s despues."
+  },
+  "revived": {
+    "channel": "announcements",
+    "color": "0x33FF66",
+    "title": "✟ {player} HA VUELTO",
+    "description": "Los dioses del Mundo Gaturro le devolvieron la vida. Tiene **{lives}** vida(s).",
+    "footer": "Dia {day}"
+  }
+}

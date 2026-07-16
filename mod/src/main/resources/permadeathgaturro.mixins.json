@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "xyz.w4ve.gaturro.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "LivingEntityMixin",
+    "MobCategoryMixin",
+    "SleepStatusMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
