@@ -14,9 +14,11 @@ convierte cada muerte en contenido para Discord sin que nadie mueva un dedo.
 2. **Discord (automático)**: embed de la muerte con su mensaje personalizado, **clip de
    audio MP3** de su último minuto de voz (50s antes + 10s de reacción, vía Simple Voice
    Chat), y el **replay** de su muerte (ServerReplay, formato Flashback).
-3. **Video (automático)**: un PC worker baja el replay, lo abre en un Minecraft headless
-   con Flashback, planta una cámara POV en la cabeza del muerto, exporta MP4 y lo publica
-   en Discord. Nadie toca nada.
+3. **Video (automático)**: un PC worker baja el replay, lo abre en un Minecraft
+   automatizado con Flashback, planta una cámara chase que sigue al muerto, exporta MP4,
+   **le mezcla encima la VOZ real de la muerte** (el clip de Simple Voice Chat, sincronizado
+   con el momento fatal), lo normaliza a mp4 web (<9MB, reproducible inline en Discord)
+   y lo publica. Nadie toca nada.
 
 ## Piezas
 

@@ -1,12 +1,14 @@
 #!/bin/bash
 # Worker de EspermaRender: baja replays pendientes de Hetzner, los renderiza a
-# MP4 con la instancia Prism "EspermaRender" (Flashback POV del muerto) y sube
-# el resultado para que el bot lo publique en el sotano.
+# MP4 con la instancia Prism "EspermaRender" (camara chase del muerto), les
+# mezcla el clip de VOZ de la muerte si existe, normaliza a mp4 web (<9MB,
+# inline en Discord) y sube el resultado para que el bot lo publique.
 set -u
 H="root@95.217.116.148"
 KEY=~/.ssh/id_ed25519
 QREMOTE=/root/gaturro-render/queue
 INBOX=/root/gaturro-render/inbox
+CLIPS=/var/lib/pterodactyl/volumes/93fdfb3f-6d0b-4cdd-8303-16a9a323b8b0/world/gaturro_clips
 LOCAL=~/.local/share/espermarender
 LOG=$LOCAL/worker.log
 
@@ -39,10 +41,17 @@ os.makedirs(os.path.expanduser("~/.local/share/espermarender"), exist_ok=True)
 json.dump(j, open(os.path.expanduser("~/.local/share/espermarender/job.json"), "w"))
 PYEOF
     rm -f "$OUT.status"
+    # esperar a que el MC del job anterior muera del todo: Prism ignora el --launch
+    # si cree que la instancia sigue corriendo
+    for i in $(seq 1 24); do
+        pgrep -f "EspermaRender/natives" >/dev/null || break
+        sleep 5
+    done
+    sleep 8
     # Prism ignora el --launch si le llega mientras inicializa: arrancar primero,
     # esperar a que respire, y ENTONCES mandar la orden (via su IPC).
     PROFILE=$HOME/.local/share/espermarender/prism
-    if ! pgrep -f "prismlauncher" >/dev/null || ! pgrep -af "prismlauncher" | grep -q "espermarender"; then
+    if ! pgrep -af "prismlauncher" 2>/dev/null | grep -q "espermarender"; then
         flatpak run org.prismlauncher.PrismLauncher -d "$PROFILE" >>"$LOG" 2>&1 &
         sleep 25
     fi
@@ -55,7 +64,33 @@ PYEOF
     done
     rm -f ~/.local/share/espermarender/job.json
     if [ -f "$OUT.status" ] && [ "$(cat "$OUT.status")" = "done" ] && [ -s "$OUT" ]; then
-        log "$id OK ($(du -h "$OUT" | cut -f1)) - subiendo"
+        # SIEMPRE re-codificar a mp4 web estandar: x264 + yuv420p + cfr + faststart.
+        # Garantiza reproduccion inline en Discord y tamano <9MB.
+        DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 "$OUT" | cut -d. -f1)
+        { [ -z "$DUR" ] || [ "$DUR" -lt 1 ]; } && DUR=62
+        VK=$(( (8*8192)/DUR - 128 ))
+        [ "$VK" -lt 300 ] && VK=300
+        [ "$VK" -gt 4000 ] && VK=4000
+
+        # voz de la gente: si existe el clip MP3 de esta muerte, se mezcla encima.
+        # El clip termina ~10s tras la muerte y el video ~12s: delay 250ms y casan.
+        PLAYER=$(python3 -c "import json;print(json.load(open('$dir/job.json'))['player'])")
+        VOICE=$(ssh -i $KEY $H "ls -t $CLIPS/${PLAYER}_*.mp3 2>/dev/null | head -1")
+        MIXARGS=()
+        if [ -n "$VOICE" ]; then
+            if scp -q -i $KEY "$H:$VOICE" "$dir/voice.mp3"; then
+                log "$id con voz: $(basename "$VOICE")"
+                MIXARGS=(-i "$dir/voice.mp3" -filter_complex "[1:a]adelay=250|250[voz];[0:a][voz]amix=inputs=2:duration=first:normalize=0[mez]" -map 0:v -map "[mez]")
+            fi
+        fi
+        log "$id normalizando (${DUR}s -> ${VK}k${VOICE:+ +voz})"
+        ffmpeg -y -v error -i "$OUT" ${MIXARGS[@]+"${MIXARGS[@]}"} \
+            -c:v libx264 -preset medium -profile:v high -pix_fmt yuv420p \
+            -b:v ${VK}k -maxrate $((VK*3/2))k -bufsize $((VK*3))k \
+            -fps_mode cfr -r 30 -g 60 \
+            -c:a aac -b:a 128k -ar 48000 \
+            -movflags +faststart "$dir/web.mp4" 2>>"$LOG" && mv "$dir/web.mp4" "$OUT"
+        log "$id OK ($(du -h "$OUT" | cut -f1)) md5=$(md5sum "$OUT" | cut -d' ' -f1) - subiendo"
         ssh -i $KEY $H "mkdir -p $INBOX"
         scp -i $KEY "$OUT" "$H:$INBOX/$id.mp4" >>"$LOG" 2>&1
         scp -i $KEY "$dir/job.json" "$H:$INBOX/$id.json" >>"$LOG" 2>&1
@@ -63,7 +98,7 @@ PYEOF
         touch "$dir/.done"
     else
         log "$id FALLO o timeout (status=$(cat "$OUT.status" 2>/dev/null || echo none))"
-        pkill -f "instances/EspermaRender" 2>/dev/null
+        pkill -f "EspermaRender/natives" 2>/dev/null
         touch "$dir/.done"  # no reintentar en bucle; se revisa a mano
     fi
 done

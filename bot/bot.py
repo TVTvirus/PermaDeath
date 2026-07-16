@@ -343,6 +343,10 @@ async def video_inbox_loop():
                         continue  # aun subiendose
                     meta = json.load(open(meta_p))
                     player = meta.get("player", "?")
+                    import hashlib
+                    with open(mp4, "rb") as fh:
+                        md5 = hashlib.md5(fh.read()).hexdigest()
+                    print(f"[gaturro] video {f}: md5={md5} size={os.path.getsize(mp4)}")
                     ch_id = CONFIG.get("channels", {}).get("deaths")
                     channel = client.get_channel(int(ch_id)) or await client.fetch_channel(int(ch_id))
                     size = os.path.getsize(mp4)

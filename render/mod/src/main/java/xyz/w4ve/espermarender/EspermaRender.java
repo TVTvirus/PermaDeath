@@ -144,9 +144,16 @@ public class EspermaRender implements ClientModInitializer {
         try {
             EditorScene scene = editorState.getCurrentScene(stamp);
             KeyframeTrack track = new KeyframeTrack(TrackEntityKeyframeType.INSTANCE);
+            // Camara chase (F5): medio bloque arriba y 4 detras, mirando donde el mira.
+            // viewOffset(0,0,0) = dentro del craneo (aprendido a las malas).
+            // DOS keyframes iguales (inicio y fin): el track solo actua ENTRE
+            // keyframes; con uno solo la camara se congela en el primer frame.
             track.keyframesByTick.put(start, new TrackEntityKeyframe(
                     UUID.fromString(job.follow), TrackingBodyPart.HEAD,
-                    0f, 0f, new Vector3d(0, 0, 0), new Vector3d(0, 0, 0), 0f));
+                    0f, 0f, new Vector3d(0, 0, 0), new Vector3d(0, 0.5, 4.0), 0f));
+            track.keyframesByTick.put(end, new TrackEntityKeyframe(
+                    UUID.fromString(job.follow), TrackingBodyPart.HEAD,
+                    0f, 0f, new Vector3d(0, 0, 0), new Vector3d(0, 0.5, 4.0), 0f));
             scene.keyframeTracks.add(track);
         } finally {
             editorState.release(stamp);
